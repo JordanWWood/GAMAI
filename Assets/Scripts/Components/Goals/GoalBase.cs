@@ -18,10 +18,3 @@ public struct SteeringBehaviours {
     public bool EnableFlocking;
     public bool EnableAvoidance;
 }
-
-public enum NavigationType {
-    AStar,
-    Dijkstra,
-    BFS,
-    DFS
-}

@@ -55,21 +55,21 @@ public class FreeCam : MonoBehaviour {
         var movementSpeed = fastMode ? this.fastMovementSpeed : this.movementSpeed;
 
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * -transform.right);
+            transform.position += (Time.deltaTime * movementSpeed * -transform.right);
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * transform.right);
+            transform.position += (Time.deltaTime * movementSpeed * transform.right);
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * transform.forward);
+            transform.position += (Time.deltaTime * movementSpeed * transform.forward);
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * -transform.forward);
+            transform.position += (Time.deltaTime * movementSpeed * -transform.forward);
         if (Input.GetKey(KeyCode.Q))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * transform.up);
+            transform.position += (Time.deltaTime * movementSpeed * transform.up);
         if (Input.GetKey(KeyCode.E))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * -transform.up);
+            transform.position += (Time.deltaTime * movementSpeed * -transform.up);
         if (Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.PageUp))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * Vector3.up);
+            transform.position += (Time.deltaTime * movementSpeed * Vector3.up);
         if (Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.PageDown))
-            transform.position = transform.position + (Time.deltaTime * movementSpeed * -Vector3.up);
+            transform.position += (Time.deltaTime * movementSpeed * -Vector3.up);
 
         if (looking) {
             float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * freeLookSensitivity;

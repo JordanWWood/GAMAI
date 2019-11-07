@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -7,6 +8,9 @@ using UnityEngine.AI;
 public class DrawNavMesh : MonoBehaviour {
     private NavMeshTriangulation _triangulation;
     public Boolean showMesh = false;
+    public bool showText = false;
+    
+    public static List<NavNode> Path = new List<NavNode>();
 
     // Start is called before the first frame update
     void Start() {
@@ -33,10 +37,19 @@ public class DrawNavMesh : MonoBehaviour {
                 point1 = _triangulation.vertices[_triangulation.indices[i]];
                 point2 = _triangulation.vertices[_triangulation.indices[i + 1]];
             }
-
+            
             var halfway = (point1 + point2) / 2;
             Handles.DrawLine(point1, point2);
+
+            if (!showText) continue;
+            Handles.Label(point1, $"{point1}");
             Handles.Label(halfway, Vector3.Distance(point1, point2) + "");
+        }
+        
+        if (Path.Count <= 1) return;
+        for (int i = 0; i + 1 < Path.Count; i++) {
+            Handles.color = Color.cyan;
+            Handles.DrawLine(Path[i].Location, Path[i+1].Location);
         }
     }
 }

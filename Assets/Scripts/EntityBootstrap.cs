@@ -3,6 +3,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public class EntityBootstrap : MonoBehaviour {
@@ -11,13 +12,28 @@ public class EntityBootstrap : MonoBehaviour {
     // Agent
     public Mesh agentMesh;
     public Material agentMaterial;
-
-    // Start is called before the first frame update
+    public bool createAgentsOnStart = true;
+    
+    
     void Start() {
         _entityManager = World.Active.EntityManager;
 
-        for (int i = 0; i < 100; i++)
-            SpawnAgentEntity(new float3(Random.Range(-28, 28), 1f, Random.Range(-20, 28)));
+        if (!createAgentsOnStart) return;
+        for (int i = 0; i < 100; i++) {
+            Vector3 loc = RandomNavmeshLocation(28);
+            SpawnAgentEntity(new float3(loc.x, 1f, loc.z));
+        }
+    }
+    
+    public Vector3 RandomNavmeshLocation(float radius) {
+        Vector3 randomDirection = Random.insideUnitSphere * radius;
+        randomDirection += transform.position;
+        NavMeshHit hit;
+        Vector3 finalPosition = Vector3.zero;
+        if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1)) {
+            finalPosition = hit.position;            
+        }
+        return finalPosition;
     }
 
     private void SpawnAgentEntity(float3 position) {
