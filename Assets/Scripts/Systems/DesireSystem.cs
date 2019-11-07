@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-public class ClusteringSystem : ComponentSystem {
+public class DesireSystem : ComponentSystem {
     protected override void OnUpdate() {
         
     }

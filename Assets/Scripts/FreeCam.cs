@@ -1,6 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
 
-// Courtesy of ashleydavis on github https://gist.github.com/ashleydavis/f025c03a9221bc840a2b 
+// Thanks to Ashley Davis for this script https://gist.github.com/ashleydavis/f025c03a9221bc840a2b
 
 /// <summary>
 /// A simple free camera to be added to a Unity game object.
@@ -44,50 +48,39 @@ public class FreeCam : MonoBehaviour {
     /// <summary>
     /// Set to true when free looking (on right mouse button).
     /// </summary>
-    private bool _looking;
+    private bool looking = false;
 
     void Update() {
         var fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        var newMovementSpeed = fastMode ? this.fastMovementSpeed : this.movementSpeed;
+        var movementSpeed = fastMode ? this.fastMovementSpeed : this.movementSpeed;
 
-        var position = transform.position;
-        
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-            position += (Time.deltaTime * newMovementSpeed * -transform.right);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * -transform.right);
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-            position += (Time.deltaTime * newMovementSpeed * transform.right);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * transform.right);
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-            position += (Time.deltaTime * newMovementSpeed * transform.forward);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * transform.forward);
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-            position += (Time.deltaTime * newMovementSpeed * -transform.forward);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * -transform.forward);
         if (Input.GetKey(KeyCode.Q))
-            position += (Time.deltaTime * newMovementSpeed * transform.up);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * transform.up);
         if (Input.GetKey(KeyCode.E))
-            position += (Time.deltaTime * newMovementSpeed * -transform.up);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * -transform.up);
         if (Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.PageUp))
-            position += (Time.deltaTime * newMovementSpeed * Vector3.up);
-
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * Vector3.up);
         if (Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.PageDown))
-            position += (Time.deltaTime * newMovementSpeed * -Vector3.up);
+            transform.position = transform.position + (Time.deltaTime * movementSpeed * -Vector3.up);
 
-        if (_looking) {
-            var localEulerAngles = transform.localEulerAngles;
-            var newRotationX = localEulerAngles.y + Input.GetAxis("Mouse X") * freeLookSensitivity;
-            var newRotationY = localEulerAngles.x - Input.GetAxis("Mouse Y") * freeLookSensitivity;
-            localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
-            transform.localEulerAngles = localEulerAngles;
+        if (looking) {
+            float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * freeLookSensitivity;
+            float newRotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * freeLookSensitivity;
+            transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
         }
 
         float axis = Input.GetAxis("Mouse ScrollWheel");
         if (axis != 0) {
-            var newZoomSensitivity = fastMode ? this.fastZoomSensitivity : this.zoomSensitivity;
-            position += newZoomSensitivity * axis * transform.forward;
+            var zoomSensitivity = fastMode ? this.fastZoomSensitivity : this.zoomSensitivity;
+            transform.position = transform.position + zoomSensitivity * axis * transform.forward;
         }
 
         if (Input.GetKeyDown(KeyCode.Mouse1)) {
@@ -96,8 +89,6 @@ public class FreeCam : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.Mouse1)) {
             StopLooking();
         }
-
-        transform.position = position;
     }
 
     void OnDisable() {
@@ -108,7 +99,7 @@ public class FreeCam : MonoBehaviour {
     /// Enable free looking.
     /// </summary>
     public void StartLooking() {
-        _looking = true;
+        looking = true;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -117,7 +108,7 @@ public class FreeCam : MonoBehaviour {
     /// Disable free looking.
     /// </summary>
     public void StopLooking() {
-        _looking = false;
+        looking = false;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
