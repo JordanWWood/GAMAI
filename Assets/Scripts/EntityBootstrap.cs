@@ -1,41 +1,45 @@
-﻿using System;
-using UnityEditor;
+﻿using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Rendering;
+using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
-[ExecuteInEditMode]
 public class EntityBootstrap : MonoBehaviour {
-    private NavMeshTriangulation _triangulation;
-    public Boolean showMesh = false;
+    private static EntityManager _entityManager;
+    
+    // Agent
+    public Mesh agentMesh;
+    public Material agentMaterial;
 
     // Start is called before the first frame update
     void Start() {
-        if (showMesh) {
-            Mesh mesh = new Mesh {vertices = _triangulation.vertices, triangles = _triangulation.indices};
-            GetComponent<MeshFilter>().mesh = mesh;
-        }
+        _entityManager = World.Active.EntityManager;
+
+        for (int i = 0; i < 100; i++)
+            SpawnAgentEntity(new float3(Random.Range(-28, 28), 1f, Random.Range(-20, 28)));
     }
 
-    private void Update() {
-        _triangulation = UnityEngine.AI.NavMesh.CalculateTriangulation();
+    private void SpawnAgentEntity(float3 position) {
+        Entity e = _entityManager.CreateEntity(
+            typeof(Translation),
+            typeof(LocalToWorld),
+            typeof(RenderMesh),
+            typeof(Scale),
+            typeof(GoalComponent),
+            typeof(AiAgentComponent));
+        SetEntityComponentData(e, position, agentMesh, agentMaterial);
+        _entityManager.SetComponentData(e, new Scale { Value = 1f });
     }
 
-    private void OnDrawGizmos() {
-        for (int i = 0; i < _triangulation.indices.Length - 1; i++) {
-            Vector3 point1;
-            Vector3 point2;
-
-            if ((i+1) % 3 == 0 && i != 0) {
-                point1 = _triangulation.vertices[_triangulation.indices[i]];
-                point2 = _triangulation.vertices[_triangulation.indices[i - 2]];
-            } else {
-                point1 = _triangulation.vertices[_triangulation.indices[i]];
-                point2 = _triangulation.vertices[_triangulation.indices[i + 1]];
-            }
-
-            var halfway = (point1 + point2) / 2;
-            Handles.DrawLine(point1, point2);
-            Handles.Label(halfway, Vector3.Distance(point1, point2) + "");
-        }
+    private void SetEntityComponentData(Entity entity, float3 spawnPosition, Mesh mesh, Material material) {
+        _entityManager.SetSharedComponentData<RenderMesh>(entity, new RenderMesh() {
+            material = material,
+            mesh = mesh
+        });
+        
+        _entityManager.SetComponentData<Translation>(entity, new Translation() {
+            Value = spawnPosition
+        });
     }
 }
