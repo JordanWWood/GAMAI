@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class Dijkstra : NavigationBase {
-    public Dijkstra(Dictionary<Vector3, NavNode> graph) : base(graph) { }
+public class AStar : NavigationBase {
+    public AStar(Dictionary<Vector3, NavNode> graph) : base(graph) { }
 
     public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target) {
         var minPriorityQueue = new List<NavNode>();
@@ -23,8 +22,8 @@ public class Dijkstra : NavigationBase {
         do {
             visitedNodes++;
             minPriorityQueue = minPriorityQueue.OrderBy(x => {
-                var successNode = minCost.TryGetValue(x, out var minCostNode);
-                return (successNode ? minCostNode : (float?) null);
+                var successNode = minCost.TryGetValue(x, out var minCostNode) ? minCostNode : null;
+                return (successNode ?? 0) + Vector3.Distance(x.Location, target);
             }).ToList();
             var node = minPriorityQueue.First();
             minPriorityQueue.Remove(node);
@@ -49,8 +48,7 @@ public class Dijkstra : NavigationBase {
             visited.Add(node);
             if (node == _graph[target]) break;
         } while (minPriorityQueue.Any());
-
-        Debug.Log("Total visited nodes = " + visitedNodes);
+        
         route.Add(_graph[target]);
         return BuildPath(route, _graph[target], nearest);
     }

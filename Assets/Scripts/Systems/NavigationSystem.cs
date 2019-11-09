@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -33,7 +35,9 @@ public class NavigationSystem : ComponentSystem {
                 });
             } else {
                 NavNode node = graph[from];
-                node.Edges.Add(new NavEdge(from, to, Vector3.Distance(from, to), Vector3.Distance(from, to), i));
+                NavEdge navEdge = new NavEdge(from, to, Vector3.Distance(from, to), Vector3.Distance(from, to), i);
+                if (!node.Edges.Contains(navEdge))
+                    node.Edges.Add(navEdge);
             }
 
             if (!graph.ContainsKey(to)) {
@@ -46,18 +50,20 @@ public class NavigationSystem : ComponentSystem {
                 });
             } else {
                 NavNode node = graph[to];
-                node.Edges.Add(new NavEdge(to, from, Vector3.Distance(from, to), Vector3.Distance(from, to), i));
+                NavEdge navEdge = new NavEdge(to, from, Vector3.Distance(from, to), Vector3.Distance(from, to), i);
+                if (!node.Edges.Contains(navEdge))
+                    node.Edges.Add(navEdge);
             }
         }
         
-        var dijkstra = new Dijkstra(graph);
-        var route = dijkstra.CalculateRoute(new Vector3(25.47f, 0, -8), new Vector3(-25.47f, 0, 8));
-        
-        Debug.Log($"DrawNavMesh path set {route.Count}");
-        DrawNavMesh.Path = route;
+
     }
 
     protected override void OnUpdate() {
-        // TODO
+        Entities.ForEach((ref AiAgentComponent agent, ref Translation translation) => {
+            var dijkstra = new AStar(graph.ToDictionary(entry=>entry.Key, entry=>entry.Value));
+            var route = dijkstra.CalculateRoute(translation.Value, new Vector3(-28.1f, 0, -28.4f));
+            DrawNavMesh.Enqueue(route);
+        });
     }
 }
