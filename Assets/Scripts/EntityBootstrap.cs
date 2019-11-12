@@ -19,7 +19,7 @@ public class EntityBootstrap : MonoBehaviour {
         _entityManager = World.Active.EntityManager;
 
         if (!createAgentsOnStart) return;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             Vector3 loc = RandomNavmeshLocation(28);
             SpawnAgentEntity(new float3(loc.x, 1f, loc.z));
         }

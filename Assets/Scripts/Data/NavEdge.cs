@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class NavEdge {
+public struct NavEdge {
     public Vector3 From { get; private set; }
     public Vector3 To { get; private set; }
     public float Cost { get; set; }

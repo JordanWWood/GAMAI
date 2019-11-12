@@ -10,15 +10,7 @@ public class DrawNavMesh : MonoBehaviour {
     public Boolean showMesh = false;
     public bool showText = false;
 
-    private static readonly Queue<List<NavNode>> _executionQueue = new Queue<List<NavNode>>();
-    
-    public static void Enqueue(List<NavNode> list) {
-        lock (_executionQueue) {
-            _executionQueue.Enqueue(list);
-        }
-    }
 
-    
     // Start is called before the first frame update
     void Start() {
         if (showMesh) {
@@ -51,14 +43,6 @@ public class DrawNavMesh : MonoBehaviour {
             if (!showText) continue;
             Handles.Label(point1, $"{point1}");
             Handles.Label(halfway, Vector3.Distance(point1, point2) + "");
-        }
-
-        lock (_executionQueue) {
-            while (_executionQueue.Count > 0) {
-                var list = _executionQueue.Dequeue();
-                for (int i = 0; i + 1 < list.Count; i++)
-                    Debug.DrawLine(list[i].Location, list[i + 1].Location, Color.cyan, .1f);
-            }
         }
     }
 }

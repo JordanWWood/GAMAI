@@ -18,9 +18,7 @@ public class AStar : NavigationBase {
         CreateNodeAtLocation(target);
 
         minPriorityQueue.Add(_graph[start]);
-        var visitedNodes = 0;
         do {
-            visitedNodes++;
             minPriorityQueue = minPriorityQueue.OrderBy(x => {
                 var successNode = minCost.TryGetValue(x, out var minCostNode) ? minCostNode : null;
                 return (successNode ?? 0) + Vector3.Distance(x.Location, target);
@@ -30,7 +28,6 @@ public class AStar : NavigationBase {
 
             foreach (var edge in node.Edges.OrderBy(x => x.Cost)) {
                 var child = _graph[edge.To];
-
                 if (visited.Contains(child)) continue;
 
                 var successChild = minCost.TryGetValue(child, out var minCostChild) ? minCostChild : null;
@@ -46,7 +43,7 @@ public class AStar : NavigationBase {
             }
 
             visited.Add(node);
-            if (node == _graph[target]) break;
+            if (node.Equals(_graph[target])) break;
         } while (minPriorityQueue.Any());
         
         route.Add(_graph[target]);

@@ -47,7 +47,7 @@ public class Dijkstra : NavigationBase {
             }
 
             visited.Add(node);
-            if (node == _graph[target]) break;
+            if (node.Equals(_graph[target])) break;
         } while (minPriorityQueue.Any());
 
         Debug.Log("Total visited nodes = " + visitedNodes);
