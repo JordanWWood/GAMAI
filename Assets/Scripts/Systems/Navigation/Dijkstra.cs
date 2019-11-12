@@ -76,8 +76,5 @@ public class Dijkstra : NavigationBase {
             },
             Index = int.MaxValue
         });
-
-        distances[0].Value.Edges.Add(new NavEdge(distances[0].Value.Location, location, distances[0].Key,
-            distances[0].Key, int.MaxValue));
     }
 }
