@@ -1,50 +1,55 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using PriorityQueues;
 using UnityEngine;
 
 public class AStar : NavigationBase {
     public AStar(Dictionary<Vector3, NavNode> graph) : base(graph) { }
 
     public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target) {
-        var minPriorityQueue = new List<NavNode>();
+        var priorityQueue = new PriorityQueue<PriorityQueueObject>();
         var route = new List<NavNode>();
 
         var minCost = new Dictionary<NavNode, float?>();
         var nearest = new Dictionary<NavNode, NavNode>();
-        var visited = new List<NavNode>();
+        
+        // Hashset uses a hashing algorithm to search for objects within the Set. This is way faster than doing .contains on a List 
+        var visited = new HashSet<NavNode>();
         
         // Create nodes at both the start and end locations so they are navigable if not directly on a node
         CreateNodeAtLocation(start);
         CreateNodeAtLocation(target);
 
-        minPriorityQueue.Add(_graph[start]);
+        priorityQueue.Enqueue(new PriorityQueueObject(_graph[start], 0));
         do {
-            minPriorityQueue = minPriorityQueue.OrderBy(x => {
-                var successNode = minCost.TryGetValue(x, out var minCostNode) ? minCostNode : null;
-                return (successNode ?? 0) + Vector3.Distance(x.Location, target);
-            }).ToList();
-            var node = minPriorityQueue.First();
-            minPriorityQueue.Remove(node);
+            var node = priorityQueue.Dequeue().Item;
 
-            foreach (var edge in node.Edges.OrderBy(x => x.Cost)) {
-                var child = _graph[edge.To];
-                if (visited.Contains(child)) continue;
+            try {
+                foreach (var edge in node.Edges.OrderBy(x => x.Cost)) {
+                    var child = _graph[edge.To];
+                    if (visited.Contains(child)) continue;
 
-                var successChild = minCost.TryGetValue(child, out var minCostChild) ? minCostChild : null;
-                var successNode = minCost.TryGetValue(node, out var minCostNode) ? minCostNode : null;
+                    var successChild = minCost.TryGetValue(child, out var minCostChild) ? minCostChild : null;
+                    var successNode = minCost.TryGetValue(node, out var minCostNode) ? minCostNode : null;
 
-                if (successChild != null && !(successNode + edge.Cost < successChild)) continue;
+                    if (successChild != null && !(successNode + edge.Cost < successChild)) continue;
 
-                minCost[child] = (successNode ?? 0) + edge.Cost;
-                nearest[child] = node;
-                
-                if (!minPriorityQueue.Contains(child))
-                    minPriorityQueue.Add(child);
+                    minCost[child] = (successNode ?? 0) + edge.Cost;
+                    nearest[child] = node;
+
+                    if (!visited.Contains(child))
+                        priorityQueue.Enqueue(new PriorityQueueObject(child, (successNode ?? 0) + edge.Cost));
+                }
+            }
+            catch (Exception e) {
+                Debug.Log("");
             }
 
-            visited.Add(node);
+            if (!visited.Contains(node))
+                visited.Add(node);
             if (node.Equals(_graph[target])) break;
-        } while (minPriorityQueue.Any());
+        } while (priorityQueue.Count() != 0);
         
         route.Add(_graph[target]);
         return BuildPath(route, _graph[target], nearest);
