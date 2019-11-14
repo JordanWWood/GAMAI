@@ -14,7 +14,7 @@ public class AStar : NavigationBase {
         var minCost = new Dictionary<NavNode, float?>();
         var nearest = new Dictionary<NavNode, NavNode>();
         
-        // Hashset uses a hashing algorithm to search for objects within the Set. This is way faster than doing .contains on a List 
+        // Hashset uses a hashing algorithm to search for objects within the Set. This is way faster than doing '.Contains' on a List 
         var visited = new HashSet<NavNode>();
         
         // Create nodes at both the start and end locations so they are navigable if not directly on a node

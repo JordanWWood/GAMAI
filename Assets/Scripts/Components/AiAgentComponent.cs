@@ -2,5 +2,9 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 public struct AiAgentComponent : IComponentData {
-    public float3 test;
+    public int NavigationIndex;
+    public int NavigationTotal;
+    public int DeferredFrames;
+
+    public bool destinationReached;
 }

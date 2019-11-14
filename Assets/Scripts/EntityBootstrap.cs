@@ -57,5 +57,9 @@ public class EntityBootstrap : MonoBehaviour {
         _entityManager.SetComponentData<Translation>(entity, new Translation() {
             Value = spawnPosition
         });
+        
+        _entityManager.SetComponentData<AiAgentComponent>(entity, new AiAgentComponent() {
+            
+        });
     }
 }

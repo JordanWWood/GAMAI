@@ -1,6 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using PriorityQueues;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Jobs;
@@ -60,11 +62,35 @@ public class NavigationSystem : ComponentSystem {
         }
     }
 
+    private class AgentComparison : IComparable<AgentComparison> {
+        public AiAgentComponent agent;
+        
+        public int CompareTo(AgentComparison other) {
+            return other == null ? 1 : agent.DeferredFrames.CompareTo(other.agent.DeferredFrames);
+        }
+    }
+    
     protected override void OnUpdate() {
-        Entities.ForEach((ref Translation translation, ref AiAgentComponent aiAgent) => {
+        var totalCalculated = 0;
+        Entities.ForEach((ref AiAgentComponent aiAgent, ref Translation translation) => {
+            var deferredFrames = aiAgent.DeferredFrames;
+            if (deferredFrames > 0) {
+                aiAgent.DeferredFrames--;
+                return;
+            }
+
+            if (totalCalculated > 6) {
+                var newDeferredFrames = totalCalculated % 6;
+                aiAgent.DeferredFrames = newDeferredFrames;
+                
+                return;
+            }
+            
             var graph = new Dictionary<Vector3, NavNode>(_graph);
             var navigation = new AStar(graph);
             var route = navigation.CalculateRoute(translation.Value, new Vector3(-28.1f, 0, -28.4f));
+
+            totalCalculated++;
         });
     }
 }
