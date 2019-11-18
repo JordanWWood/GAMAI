@@ -19,7 +19,7 @@ public class EntityBootstrap : MonoBehaviour {
         _entityManager = World.Active.EntityManager;
 
         if (!createAgentsOnStart) return;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
             Vector3 loc = RandomNavmeshLocation(28);
             SpawnAgentEntity(new float3(loc.x, 1f, loc.z));
         }
@@ -56,6 +56,10 @@ public class EntityBootstrap : MonoBehaviour {
         
         _entityManager.SetComponentData<Translation>(entity, new Translation() {
             Value = spawnPosition
+        });
+        
+        _entityManager.SetComponentData<AiAgentComponent>(entity, new AiAgentComponent() {
+            
         });
     }
 }
