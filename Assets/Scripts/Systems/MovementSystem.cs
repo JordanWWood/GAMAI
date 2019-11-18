@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine;
 
 // Incredibly basic system to update the location based on the current velocity
 public class MovementSystem : ComponentSystem {
