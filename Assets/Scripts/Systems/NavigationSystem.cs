@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using PriorityQueues;
-using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.AI;
 
+[UpdateAfter(typeof(GoalSystem))]
 public class NavigationSystem : ComponentSystem {
     private static readonly ConcurrentDictionary<Vector3, NavNode> _graph = new ConcurrentDictionary<Vector3, NavNode>();
 
@@ -62,34 +60,38 @@ public class NavigationSystem : ComponentSystem {
         }
     }
 
-    private class AgentComparison : IComparable<AgentComparison> {
-        public AiAgentComponent agent;
-        
-        public int CompareTo(AgentComparison other) {
-            return other == null ? 1 : agent.DeferredFrames.CompareTo(other.agent.DeferredFrames);
-        }
-    }
-    
     protected override void OnUpdate() {
         var totalCalculated = 0;
-        Entities.ForEach((ref AiAgentComponent aiAgent, ref Translation translation) => {
-            var deferredFrames = aiAgent.DeferredFrames;
-            if (deferredFrames > 0) {
-                aiAgent.DeferredFrames--;
-                return;
-            }
-
-            if (totalCalculated > 6) {
-                var newDeferredFrames = totalCalculated % 6;
-                aiAgent.DeferredFrames = newDeferredFrames;
-                
-                return;
-            }
+        Entities.ForEach((Entity e, ref AiAgentComponent aiAgent, ref Translation translation) => {
+            if (!aiAgent.destinationReached) return;
             
+//            var deferredFrames = aiAgent.DeferredFrames;
+//            if (deferredFrames > 0) {
+//                aiAgent.DeferredFrames--;
+//                return;
+//            }
+//
+//            if (totalCalculated > 3) {
+//                var newDeferredFrames = totalCalculated % 3;
+//                aiAgent.DeferredFrames = newDeferredFrames;
+//
+//                totalCalculated++;
+//                return;
+//            }
+//            
             var graph = new Dictionary<Vector3, NavNode>(_graph);
             var navigation = new AStar(graph);
-            var route = navigation.CalculateRoute(translation.Value, new Vector3(-28.1f, 0, -28.4f));
+            var route = navigation.CalculateRoute(translation.Value, EntityBootstrap.Instance.RandomNavmeshLocation(32));
+            route.Reverse();
 
+            var bufferFromEntity = EntityManager.GetBuffer<BufferedNavNode>(e);
+            bufferFromEntity.Clear();
+            foreach (var node in route) bufferFromEntity.Add(new BufferedNavNode { Node = node.Location });
+
+            aiAgent.destinationReached = false;
+            aiAgent.NavigationIndex = 1;
+            
+            aiAgent.DeferredFrames++;
             totalCalculated++;
         });
     }

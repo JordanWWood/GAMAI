@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System.Collections.Generic;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
@@ -13,13 +14,19 @@ public class EntityBootstrap : MonoBehaviour {
     public Mesh agentMesh;
     public Material agentMaterial;
     public bool createAgentsOnStart = true;
-    
+
+    [Range(.1f, 1.0f)]
+    public float Speed;
+
+    public static EntityBootstrap Instance;
     
     void Start() {
+        Instance = this;
+        
         _entityManager = World.Active.EntityManager;
 
         if (!createAgentsOnStart) return;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 5; i++) {
             Vector3 loc = RandomNavmeshLocation(28);
             SpawnAgentEntity(new float3(loc.x, 1f, loc.z));
         }
@@ -43,23 +50,27 @@ public class EntityBootstrap : MonoBehaviour {
             typeof(RenderMesh),
             typeof(Scale),
             typeof(GoalComponent),
-            typeof(AiAgentComponent));
+            typeof(AiAgentComponent),
+            typeof(SteeringComponent),
+            typeof(RotationEulerXYZ));
         SetEntityComponentData(e, position, agentMesh, agentMaterial);
         _entityManager.SetComponentData(e, new Scale { Value = 1f });
     }
 
     private void SetEntityComponentData(Entity entity, float3 spawnPosition, Mesh mesh, Material material) {
-        _entityManager.SetSharedComponentData<RenderMesh>(entity, new RenderMesh() {
+        _entityManager.SetSharedComponentData(entity, new RenderMesh {
             material = material,
             mesh = mesh
         });
         
-        _entityManager.SetComponentData<Translation>(entity, new Translation() {
+        _entityManager.SetComponentData(entity, new Translation {
             Value = spawnPosition
         });
         
-        _entityManager.SetComponentData<AiAgentComponent>(entity, new AiAgentComponent() {
-            
+        _entityManager.SetComponentData(entity, new AiAgentComponent {
+            destinationReached = true
         });
+
+        _entityManager.AddBuffer<BufferedNavNode>(entity);
     }
 }
