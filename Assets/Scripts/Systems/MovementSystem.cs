@@ -7,7 +7,7 @@ public class MovementSystem : ComponentSystem {
     protected override void OnUpdate() {
         Entities.ForEach(
             (ref Translation translation, ref SteeringComponent steeringComponent, ref AiAgentComponent aiAgentComponent) => {
-                translation.Value += steeringComponent.Velocity;
+                translation.Value += steeringComponent.Velocity * (Time.deltaTime * 60);
             });
     }
 }

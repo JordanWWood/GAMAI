@@ -9,7 +9,7 @@ using UnityEngine.AI;
 
 [UpdateAfter(typeof(GoalSystem))]
 public class NavigationSystem : ComponentSystem {
-    private static readonly ConcurrentDictionary<Vector3, NavNode> _graph = new ConcurrentDictionary<Vector3, NavNode>();
+    private static readonly Dictionary<Vector3, NavNode> _graph = new Dictionary<Vector3, NavNode>();
 
     protected override void OnStartRunning() {
         NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
@@ -29,7 +29,7 @@ public class NavigationSystem : ComponentSystem {
             }
 
             if (!_graph.ContainsKey(from)) {
-                _graph.TryAdd(from, new NavNode() {
+                _graph.Add(from, new NavNode() {
                     Index = triangulation.indices[i],
                     Location = from,
                     Edges = new List<NavEdge> {
@@ -44,7 +44,7 @@ public class NavigationSystem : ComponentSystem {
             }
 
             if (!_graph.ContainsKey(to)) {
-                _graph.TryAdd(to, new NavNode() {
+                _graph.Add(to, new NavNode() {
                     Index = triangulation.indices[i + 1],
                     Location = to,
                     Edges = new List<NavEdge> {
@@ -63,7 +63,7 @@ public class NavigationSystem : ComponentSystem {
     protected override void OnUpdate() {
         var totalCalculated = 0;
         Entities.ForEach((Entity e, ref AiAgentComponent aiAgent, ref Translation translation) => {
-            if (!aiAgent.destinationReached) return;
+            if (!aiAgent.DestinationReached) return;
             
 //            var deferredFrames = aiAgent.DeferredFrames;
 //            if (deferredFrames > 0) {
@@ -88,7 +88,7 @@ public class NavigationSystem : ComponentSystem {
             bufferFromEntity.Clear();
             foreach (var node in route) bufferFromEntity.Add(new BufferedNavNode { Node = node.Location });
 
-            aiAgent.destinationReached = false;
+            aiAgent.DestinationReached = false;
             aiAgent.NavigationIndex = 1;
             
             aiAgent.DeferredFrames++;

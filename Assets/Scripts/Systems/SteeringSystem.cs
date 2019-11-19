@@ -20,25 +20,28 @@ public class SteeringSystem : JobComponentSystem {
             var nodes = Routes[entity];
             if (nodes.Length <= 1) return;
 
-            const float seekForce = .005f;
-            const float avoidForce = .01f;
+            const float seekForce = .0025f;
+            const float avoidForce = .003f;
             const float maxSpeed = .1f;
             
             var currentVelocity = new Vector3(steeringComponent.Velocity.x, steeringComponent.Velocity.y, steeringComponent.Velocity.z);
             var target = new Vector3(nodes[aiAgent.NavigationIndex].Node.x, 1, nodes[aiAgent.NavigationIndex].Node.z);
             var location = new Vector3(localToWorld.Position.x, 1, localToWorld.Position.z);
 
-            var newDirection = SteeringBehaviours.Seek(currentVelocity, location, target, maxSpeed, seekForce);
-            newDirection += SteeringBehaviours.Avoid(currentVelocity, translation.Value, maxSpeed, avoidForce, 20.0f, World);
+            var steering = SteeringBehaviours.Seek(currentVelocity, location, target, maxSpeed, seekForce);
+            steering += SteeringBehaviours.WallAvoidance(currentVelocity, translation.Value, maxSpeed, avoidForce, 20.0f, World);
+            //steering += 
+
+            var newDirection = Vector3.ClampMagnitude(currentVelocity + steering, maxSpeed);
             
-            if (Vector3.Distance(target, location) <= .25f) {
-                bool destinationReached = aiAgent.destinationReached;
+            if (Vector3.Distance(target, location) <= .5f) {
+                bool destinationReached = aiAgent.DestinationReached;
                 if (aiAgent.NavigationIndex + 1 >= nodes.Length) destinationReached = true;
                 
                 EntityCommandBuffer.SetComponent(index, entity, new AiAgentComponent() {
                     NavigationIndex = aiAgent.NavigationIndex + 1,
                     DeferredFrames = aiAgent.DeferredFrames,
-                    destinationReached = destinationReached,
+                    DestinationReached = destinationReached,
                     NavigationTotal = aiAgent.NavigationTotal
                 });
             }

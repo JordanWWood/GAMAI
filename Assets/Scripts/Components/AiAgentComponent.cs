@@ -8,5 +8,5 @@ public struct AiAgentComponent : IComponentData {
     public int NavigationTotal;
     public int DeferredFrames;
     
-    public bool destinationReached;
+    public bool DestinationReached;
 }

@@ -13,25 +13,41 @@ public static class SteeringBehaviours {
         intendedVelocity.Normalize();
         intendedVelocity *= maxSpeed;
 
-        var steering = Vector3.ClampMagnitude((intendedVelocity - currentVelocity), steeringForce);
-        return Vector3.ClampMagnitude(currentVelocity + steering, maxSpeed);
+        return Vector3.ClampMagnitude((intendedVelocity - currentVelocity), steeringForce);
     }
 
-    public static Vector3 Avoid(Vector3 currentVelocity, Vector3 position, float maxSpeed, float steeringForce,
+    public static Vector3 WallAvoidance(Vector3 currentVelocity, Vector3 position, float maxSpeed, float steeringForce,
         float distance, PhysicsWorld pWorld) {
-        var to = (position + (currentVelocity * distance));
-
-        var result = Raycast(new float3(position.x, position.y, position.z), new float3(to.x, to.y, to.z), pWorld);
-        if (!result.Item1) return new Vector3();
         
-        var avoidance = new Vector3 {x = to.x - result.Item2.x, z = to.z - result.Item2.z};
-        avoidance.Normalize();
-        avoidance *= steeringForce;
+        Vector3[] feelers = new[] {
+            position + (currentVelocity * distance),
+            position + ((Quaternion.AngleAxis(-45, Vector3.up) * currentVelocity) * (distance/2)), 
+            position + ((Quaternion.AngleAxis(45, Vector3.up) * currentVelocity) * (distance/2))
+        };
+        
+        Vector3 avoidance = new Vector3();
+        foreach (var feeler in feelers) {
+            float distanceToIntersect = float.MaxValue;
+            Vector3 closestPoint = new Vector3();
+            var result = Raycast(new float3(position.x, position.y, position.z), new float3(feeler.x, feeler.y, feeler.z), pWorld);
+            if (!result.Item1) continue;
+
+            var vecDistance = Vector3.Distance(result.Item3, position);
+            if (vecDistance < distanceToIntersect) {
+                closestPoint = result.hitLoc;
+                distanceToIntersect = vecDistance;
+            }
+            
+            if (distanceToIntersect == float.MaxValue) continue;
+            
+            var depth = feeler - closestPoint;
+            avoidance = result.normal * depth.magnitude;
+        }
 
         return avoidance;
     }
 
-    private static (bool, Vector3, Vector3) Raycast(float3 rayFrom, float3 rayTo, PhysicsWorld pWorld) {
+    private static (bool hit, Vector3 normal, Vector3 hitLoc) Raycast(float3 rayFrom, float3 rayTo, PhysicsWorld pWorld) {
         RaycastInput input = new RaycastInput() {
             Start = rayFrom,
             End = rayTo,
@@ -43,16 +59,17 @@ public static class SteeringBehaviours {
         };
 
         bool haveHit = pWorld.CollisionWorld.CastRay(input, out var hit);
-        
-        //Debug.Log($"Raycast hit {haveHit} {hit.Position}");
-        //UnityMainThreadDispatcher.Instance().Enqueue(() => Debug.DrawLine(rayFrom, rayTo));
 
-        if (!haveHit) return (false, new Vector3(), new Vector3());
-        var objectLoc = pWorld.Bodies[hit.RigidBodyIndex].WorldFromBody.pos;
+        if (!haveHit) {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => Debug.DrawLine(rayFrom, rayTo, Color.white));
+            return (false, new Vector3(), new Vector3());
+        }
+        if (hit.RigidBodyIndex == -1) return (false, new Vector3(), new Vector3());
+        
+        UnityMainThreadDispatcher.Instance().Enqueue(() => Debug.DrawLine(rayFrom, rayTo, Color.red));
+
+        var normal = hit.SurfaceNormal;
         var hitLoc = hit.Position;
-
-        //Debug.Log($"Raycast hit {haveHit} {hitLoc}");
-        
-        return (true, objectLoc, hitLoc);
+        return (true, normal, hitLoc);
     }
 }
