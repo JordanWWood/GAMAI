@@ -8,6 +8,7 @@ using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
 
+
 [UpdateAfter(typeof(NavigationSystem))]
 public class SteeringSystem : JobComponentSystem {
     [BurstCompile]
@@ -21,16 +22,17 @@ public class SteeringSystem : JobComponentSystem {
             if (nodes.Length <= 1) return;
 
             const float seekForce = .0025f;
-            const float avoidForce = .003f;
+            const float wAvoidForce = .03f;
+            const float oAvoidForce = 1.0f;
             const float maxSpeed = .1f;
-            
+
             var currentVelocity = new Vector3(steeringComponent.Velocity.x, steeringComponent.Velocity.y, steeringComponent.Velocity.z);
             var target = new Vector3(nodes[aiAgent.NavigationIndex].Node.x, 1, nodes[aiAgent.NavigationIndex].Node.z);
             var location = new Vector3(localToWorld.Position.x, 1, localToWorld.Position.z);
 
             var steering = SteeringBehaviours.Seek(currentVelocity, location, target, maxSpeed, seekForce);
-            steering += SteeringBehaviours.WallAvoidance(currentVelocity, translation.Value, maxSpeed, avoidForce, 20.0f, World);
-            //steering += 
+            steering += SteeringBehaviours.WallAvoidance(currentVelocity, translation.Value, maxSpeed, wAvoidForce, 2.0f, World);
+            steering += SteeringBehaviours.ObstacleAvoidance(currentVelocity, translation.Value, oAvoidForce, 2.0f, World);
 
             var newDirection = Vector3.ClampMagnitude(currentVelocity + steering, maxSpeed);
             

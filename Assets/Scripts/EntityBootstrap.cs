@@ -5,7 +5,6 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements.Experimental;
 using Collider = UnityEngine.Collider;
 using Material = UnityEngine.Material;
 using Random = UnityEngine.Random;
@@ -62,7 +61,6 @@ public class EntityBootstrap : MonoBehaviour {
             typeof(PhysicsCollider),
             typeof(RotationEulerXYZ));
         
-        
         SetEntityComponentData(e, position, agentMesh, agentMaterial, collider);
         _entityManager.SetComponentData(e, new Scale { Value = 1f });
     }
@@ -80,7 +78,8 @@ public class EntityBootstrap : MonoBehaviour {
         _entityManager.SetComponentData(entity, new AiAgentComponent {
             DestinationReached = true
         });
-
+        
+        Debug.Log(sourceCollider.Value.Filter.BelongsTo);
         _entityManager.SetComponentData(entity, new PhysicsCollider { Value = sourceCollider });
         _entityManager.AddBuffer<BufferedNavNode>(entity);
     }

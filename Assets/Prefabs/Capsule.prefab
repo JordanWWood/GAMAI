@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3295731626353768005}
   - component: {fileID: 6789538844168931825}
   - component: {fileID: 8665896262291757039}
-  - component: {fileID: 155621768639125721}
+  - component: {fileID: 7856081180248838442}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -55,7 +55,6 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -80,8 +79,8 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!136 &155621768639125721
-CapsuleCollider:
+--- !u!65 &7856081180248838442
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -90,7 +89,6 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
