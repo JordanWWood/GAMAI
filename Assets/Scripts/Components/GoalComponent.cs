@@ -4,4 +4,5 @@ using Unity.Entities;
 
 public struct GoalComponent : IComponentData {
     public int index;
+    public int progress;
 }

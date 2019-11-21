@@ -14,6 +14,8 @@ public abstract class GoalBase {
 }
 
 public struct SteeringBehaviour {
-    public bool EnableGeneralSteeringBehaviour;
-    public bool EnableAvoidance;
+    public bool Seek;
+    public bool EnableWallAvoidance;
+    public bool EnableObjectAvoidance;
+    public bool Wander;
 }

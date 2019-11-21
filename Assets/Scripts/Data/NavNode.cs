@@ -24,6 +24,5 @@ public struct NavNode : ICloneable {
         if (d == null) return null;
         var t = d.GetType();
         return (from ci in t.GetConstructors() let pi = ci.GetParameters() where pi.Length == 1 && pi[0].ParameterType == t select ci.Invoke(new object[] {d})).FirstOrDefault();
-
     }
 }
