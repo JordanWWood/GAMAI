@@ -81,7 +81,7 @@ public class NavigationSystem : ComponentSystem {
 //            
             var graph = new Dictionary<Vector3, NavNode>(_graph);
             var navigation = new AStar(graph);
-            var route = navigation.CalculateRoute(translation.Value, EntityBootstrap.Instance.RandomNavmeshLocation(32));
+            var route = navigation.CalculateRoute(translation.Value, EntityBootstrap.Instance.RandomNavmeshLocation(50));
             route.Reverse();
 
             var bufferFromEntity = EntityManager.GetBuffer<BufferedNavNode>(e);

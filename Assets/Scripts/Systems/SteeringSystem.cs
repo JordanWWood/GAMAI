@@ -22,8 +22,8 @@ public class SteeringSystem : JobComponentSystem {
             if (nodes.Length <= 1) return;
 
             const float seekForce = .0025f;
-            const float wAvoidForce = .01f;
-            const float oAvoidForce = .01f;
+            const float wAvoidForce = .05f;
+            const float oAvoidForce = .0075f;
             const float maxSpeed = .1f;
 
             var currentVelocity = new Vector3(steeringComponent.Velocity.x, steeringComponent.Velocity.y, steeringComponent.Velocity.z);
@@ -32,7 +32,7 @@ public class SteeringSystem : JobComponentSystem {
 
             var steering = SteeringBehaviours.Seek(currentVelocity, location, target, maxSpeed, seekForce);
             steering += SteeringBehaviours.WallAvoidance(currentVelocity, translation.Value, maxSpeed, wAvoidForce, 2.0f, World);
-            steering += SteeringBehaviours.ObstacleAvoidance(currentVelocity, translation.Value, oAvoidForce, 5.0f, World);
+            steering += SteeringBehaviours.ObstacleAvoidance(currentVelocity, translation.Value, oAvoidForce, 3.0f, World);
 
             var newDirection = Vector3.ClampMagnitude(currentVelocity + steering, maxSpeed);
             if (Vector3.Distance(target, location) <= .5f) {

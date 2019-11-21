@@ -32,8 +32,8 @@ public class EntityBootstrap : MonoBehaviour {
         var sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(AgentPrefab, World.Active);
         var sourceCollider = _entityManager.GetComponentData<PhysicsCollider>(sourceEntity).Value;
         if (!createAgentsOnStart) return;
-        for (int i = 0; i < 10; i++) {
-            Vector3 loc = RandomNavmeshLocation(28);
+        for (int i = 0; i < 100; i++) {
+            Vector3 loc = RandomNavmeshLocation(40);
             SpawnAgentEntity(new float3(loc.x, 1f, loc.z), sourceEntity, sourceCollider);
         }
     }
@@ -72,7 +72,8 @@ public class EntityBootstrap : MonoBehaviour {
         });
 
         _entityManager.SetComponentData(entity, new AiAgentComponent {
-            DestinationReached = true
+            DestinationReached = true,
+            TimeSinceLastStuckCheck = float.MaxValue
         });
 
 //        var newCollider = Unity.Physics.CapsuleCollider.Create(
