@@ -12,12 +12,12 @@ using UnityEngine;
 [UpdateAfter(typeof(NavigationSystem))]
 public class SteeringSystem : JobComponentSystem {
     [BurstCompile]
-    private struct SteeringJob : IJobForEachWithEntity<Translation, SteeringComponent, LocalToWorld, AiAgentComponent> {
+    private struct SteeringJob : IJobForEachWithEntity<Translation, SteeringComponent, LocalToWorld, AiAgentComponent, GoalComponent> {
         [ReadOnly] public BufferFromEntity<BufferedNavNode> Routes;
         [ReadOnly] public PhysicsWorld World;
         public EntityCommandBuffer.Concurrent EntityCommandBuffer;
 
-        public void Execute(Entity entity, int index, ref Translation translation, ref SteeringComponent steeringComponent, ref LocalToWorld localToWorld, ref AiAgentComponent aiAgent) {
+        public void Execute(Entity entity, int index, ref Translation translation, ref SteeringComponent steeringComponent, ref LocalToWorld localToWorld, ref AiAgentComponent aiAgent, ref GoalComponent goalComponent) {
             var nodes = Routes[entity];
             if (nodes.Length <= 1) return;
 
@@ -25,7 +25,7 @@ public class SteeringSystem : JobComponentSystem {
             const float wAvoidForce = .05f;
             const float oAvoidForce = .0075f;
             const float maxSpeed = .1f;
-
+            
             var currentVelocity = new Vector3(steeringComponent.Velocity.x, steeringComponent.Velocity.y, steeringComponent.Velocity.z);
             var target = new Vector3(nodes[aiAgent.NavigationIndex].Node.x, 1, nodes[aiAgent.NavigationIndex].Node.z);
             var location = new Vector3(localToWorld.Position.x, 1, localToWorld.Position.z);

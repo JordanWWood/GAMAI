@@ -34,7 +34,7 @@ public class EntityBootstrap : MonoBehaviour {
         if (!createAgentsOnStart) return;
         for (int i = 0; i < 100; i++) {
             Vector3 loc = RandomNavmeshLocation(40);
-            SpawnAgentEntity(new float3(loc.x, 1f, loc.z), sourceEntity, sourceCollider);
+            SpawnAgentEntity(i, new float3(loc.x, 1f, loc.z), sourceEntity, sourceCollider);
         }
     }
 
@@ -50,17 +50,17 @@ public class EntityBootstrap : MonoBehaviour {
         return finalPosition;
     }
 
-    private void SpawnAgentEntity(float3 position, Entity entity, BlobAssetReference<Unity.Physics.Collider> collider) {
+    private void SpawnAgentEntity(int id, float3 position, Entity entity, BlobAssetReference<Unity.Physics.Collider> collider) {
         var instance = _entityManager.Instantiate(entity);
         _entityManager.AddComponent<GoalComponent>(instance);
         _entityManager.AddComponent<AiAgentComponent>(instance);
         _entityManager.AddComponent<SteeringComponent>(instance);
         _entityManager.AddComponent<RotationEulerXYZ>(instance);
         
-        SetEntityComponentData(instance, position, agentMesh, agentMaterial, collider);
+        SetEntityComponentData(id, instance, position, agentMesh, agentMaterial, collider);
     }
 
-    private void SetEntityComponentData(Entity entity, float3 spawnPosition, Mesh mesh, Material material,
+    private void SetEntityComponentData(int id, Entity entity, float3 spawnPosition, Mesh mesh, Material material,
         BlobAssetReference<Unity.Physics.Collider> sourceCollider) {
         _entityManager.SetSharedComponentData(entity, new RenderMesh {
             material = material,
@@ -75,22 +75,16 @@ public class EntityBootstrap : MonoBehaviour {
             DestinationReached = true,
             TimeSinceLastStuckCheck = float.MaxValue
         });
-
-//        var newCollider = Unity.Physics.CapsuleCollider.Create(
-//            new CapsuleGeometry {
-//                Radius = .5f,
-//                Vertex0 = new float3(0, .25f, 0),
-//                Vertex1 = new float3(0, .75f, 0)
-//            }, new CollisionFilter {
-//                BelongsTo = 2,
-//                CollidesWith = ~0u,
-//                GroupIndex = 0
-//            });
+        
         _entityManager.SetComponentData(entity, new PhysicsCollider {
             Value = sourceCollider
         });
-        Debug.Log(sourceCollider.IsCreated + " | " + sourceCollider.Value.CollisionType);
-
+        
+        _entityManager.SetComponentData(entity, new GoalComponent() {
+            index = id,
+            progress = 0
+        });
+        
         _entityManager.AddBuffer<BufferedNavNode>(entity);
     }
 }

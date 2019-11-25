@@ -68,7 +68,7 @@ namespace PriorityQueues {
         public override string ToString() {
             string s = "";
             for (int i = 0; i < data.Count; ++i)
-                s += data[i].ToString() + " ";
+                s += data[i] + " ";
             s += "count = " + data.Count;
             return s;
         }

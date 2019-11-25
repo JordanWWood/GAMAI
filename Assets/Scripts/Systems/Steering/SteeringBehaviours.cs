@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -6,6 +7,7 @@ using Unity.Physics.Systems;
 using UnityEditor;
 using UnityEngine;
 using Collider = Unity.Physics.Collider;
+using Random = Unity.Mathematics.Random;
 using RaycastHit = Unity.Physics.RaycastHit;
 
 public static class SteeringBehaviours {
@@ -74,10 +76,31 @@ public static class SteeringBehaviours {
         else if (rightHit) avoidance -= rightObjectPos;
         else avoidance -= topObjectPos;
         
-
         avoidance.y = 0;
 
         return avoidance * steeringForce;
+    }
+    
+    public static Vector3 Wander(Vector3 currentVelocity, Vector3 position, float maxSpeed, float wanderRadius, float wanderDistance, float wanderJitter, float steeringForce) {
+        var currentJitter = wanderJitter * Time.deltaTime;
+        
+        var wanderTarget = new Vector3(RandomClamped() * currentJitter,
+                                0,
+                                RandomClamped() * currentJitter);
+        wanderTarget.Normalize();
+        wanderTarget *= wanderRadius;
+        var localTarget = wanderTarget + new Vector3(wanderDistance, 0, 0);
+        
+        Matrix4x4 mat = new Matrix4x4();
+        mat.SetTRS(position, Quaternion.LookRotation(currentVelocity.normalized), new Vector3(1, 1, 1));
+        var target =mat.MultiplyPoint(localTarget);
+
+        return Seek(currentVelocity, position, target, maxSpeed, steeringForce);
+    }
+
+    private static Random _r = new Random();
+    private static float RandomClamped() {
+        return _r.NextFloat() - _r.NextFloat();
     }
 
     private static (bool hit, Vector3 normal, Vector3 hitLoc, Vector3 objectPos) Raycast(float3 rayFrom, float3 rayTo, uint collideLayer,
