@@ -15,7 +15,7 @@ public class NavigationSystem : ComponentSystem {
         NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
 
         // Build Graph from NavMesh
-        for (int i = 0; i < triangulation.indices.Length - 1; i++) {
+        for (var i = 0; i < triangulation.indices.Length - 1; i++) {
             Vector3 from;
             Vector3 to;
 
@@ -29,7 +29,7 @@ public class NavigationSystem : ComponentSystem {
             }
 
             if (!_graph.ContainsKey(from)) {
-                _graph.Add(from, new NavNode() {
+                _graph.Add(from, new NavNode {
                     Index = triangulation.indices[i],
                     Location = from,
                     Edges = new List<NavEdge> {
@@ -37,14 +37,14 @@ public class NavigationSystem : ComponentSystem {
                     }
                 });
             } else {
-                NavNode node = _graph[from];
-                NavEdge navEdge = new NavEdge(from, to, Vector3.Distance(from, to), Vector3.Distance(from, to), i);
+                var node = _graph[from];
+                var navEdge = new NavEdge(from, to, Vector3.Distance(from, to), Vector3.Distance(from, to), i);
                 if (!node.Edges.Contains(navEdge))
                     node.Edges.Add(navEdge);
             }
 
             if (!_graph.ContainsKey(to)) {
-                _graph.Add(to, new NavNode() {
+                _graph.Add(to, new NavNode {
                     Index = triangulation.indices[i + 1],
                     Location = to,
                     Edges = new List<NavEdge> {
@@ -52,8 +52,8 @@ public class NavigationSystem : ComponentSystem {
                     }
                 });
             } else {
-                NavNode node = _graph[to];
-                NavEdge navEdge = new NavEdge(to, from, Vector3.Distance(from, to), Vector3.Distance(from, to), i);
+                var node = _graph[to];
+                var navEdge = new NavEdge(to, from, Vector3.Distance(from, to), Vector3.Distance(from, to), i);
                 if (!node.Edges.Contains(navEdge))
                     node.Edges.Add(navEdge);
             }
@@ -61,27 +61,12 @@ public class NavigationSystem : ComponentSystem {
     }
 
     protected override void OnUpdate() {
-        var totalCalculated = 0;
-        Entities.ForEach((Entity e, ref AiAgentComponent aiAgent, ref Translation translation) => {
+        Entities.ForEach((Entity e, ref AiAgentComponent aiAgent, ref Translation translation, ref GoalComponent goalComponent) => {
             if (!aiAgent.DestinationReached) return;
-            
-//            var deferredFrames = aiAgent.DeferredFrames;
-//            if (deferredFrames > 0) {
-//                aiAgent.DeferredFrames--;
-//                return;
-//            }
-//
-//            if (totalCalculated > 3) {
-//                var newDeferredFrames = totalCalculated % 3;
-//                aiAgent.DeferredFrames = newDeferredFrames;
-//
-//                totalCalculated++;
-//                return;
-//            }
-//            
+
             var graph = new Dictionary<Vector3, NavNode>(_graph);
             var navigation = new AStar(graph);
-            var route = navigation.CalculateRoute(translation.Value, EntityBootstrap.Instance.RandomNavmeshLocation(50));
+            var route = navigation.CalculateRoute(translation.Value, goalComponent.CurrentTarget);
             route.Reverse();
 
             var bufferFromEntity = EntityManager.GetBuffer<BufferedNavNode>(e);
@@ -90,9 +75,6 @@ public class NavigationSystem : ComponentSystem {
 
             aiAgent.DestinationReached = false;
             aiAgent.NavigationIndex = 1;
-            
-            aiAgent.DeferredFrames++;
-            totalCalculated++;
         });
     }
 }

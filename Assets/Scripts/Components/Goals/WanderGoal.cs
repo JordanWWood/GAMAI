@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 public class WanderGoal : GoalBase {
-    public WanderGoal(NavigationType navType, Vector3 target) : base(navType,
-        new SteeringBehaviour(), target) {
+    public WanderGoal(NavigationType navType) : base(navType,
+        new SteeringBehaviour()) {
         var steeringBehaviour = SteeringBehaviours;
         steeringBehaviour.Seek = false;
         steeringBehaviour.EnableObjectAvoidance = true;
@@ -10,5 +10,9 @@ public class WanderGoal : GoalBase {
         steeringBehaviour.Wander = true;
 
         SteeringBehaviours = steeringBehaviour;
+    }
+
+    public override (bool, Vector3) CalculateTarget(Vector3 pos, int progress, bool forceRecalc) {
+        return (false, Vector3.zero);
     }
 }

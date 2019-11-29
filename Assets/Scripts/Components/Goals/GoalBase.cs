@@ -6,14 +6,15 @@ using UnityEngine;
 public abstract class GoalBase : IComparable<GoalBase> {
     public NavigationType NavType { get; protected set; }
     public SteeringBehaviour SteeringBehaviours { get; protected set; }
-    public Vector3 Target;
+    protected Vector3 CurrentTarget;
     public int Priority;
 
-    public GoalBase(NavigationType navType, SteeringBehaviour steeringBehaviours, Vector3 target) {
+    public GoalBase(NavigationType navType, SteeringBehaviour steeringBehaviours) {
         NavType = navType;
         SteeringBehaviours = steeringBehaviours;
-        Target = target;
     }
+
+    public abstract (bool, Vector3) CalculateTarget(Vector3 pos, int progress, bool forceRecalc);
 
     public int CompareTo(GoalBase other) {
         return other == null ? 1 : Priority.CompareTo(other.Priority);
