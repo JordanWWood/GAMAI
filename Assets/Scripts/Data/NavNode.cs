@@ -7,12 +7,12 @@ using UnityEngine;
 public struct NavNode : ICloneable {
     public int Index;
     public Vector3 Location;
-    public List<NavEdge> Edges;
+    public HashSet<NavEdge> Edges;
 
     public NavNode(NavNode d) {
         Index = d.Index;
         Location = d.Location;
-        Edges = new List<NavEdge>(d.Edges);
+        Edges = new HashSet<NavEdge>(d.Edges);
     }
 
     public object Clone() {

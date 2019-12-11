@@ -4,9 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class Dijkstra : NavigationBase {
-    public Dijkstra(Dictionary<Vector3, NavNode> graph) : base(graph) { }
-
-    public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target) {
+    public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target, Dictionary<Vector3, NavNode> graph) {
         var minPriorityQueue = new List<NavNode>();
         var route = new List<NavNode>();
 
@@ -17,10 +15,10 @@ public class Dijkstra : NavigationBase {
         var visited = new HashSet<NavNode>();
         
         // Create nodes at both the start and end locations so they are navigable if not directly on a node
-        CreateNodeAtLocation(start);
-        CreateNodeAtLocation(target);
+        CreateNodeAtLocation(start, graph);
+        CreateNodeAtLocation(target, graph);
 
-        minPriorityQueue.Add(_graph[start]);
+        minPriorityQueue.Add(graph[start]);
         var visitedNodes = 0;
         do {
             visitedNodes++;
@@ -32,7 +30,7 @@ public class Dijkstra : NavigationBase {
             minPriorityQueue.Remove(node);
 
             foreach (var edge in node.Edges.OrderBy(x => x.Cost)) {
-                var child = _graph[edge.To];
+                var child = graph[edge.To];
 
                 if (visited.Contains(child)) continue;
 
@@ -49,12 +47,12 @@ public class Dijkstra : NavigationBase {
             }
 
             visited.Add(node);
-            if (node.Equals(_graph[target])) break;
+            if (node.Equals(graph[target])) break;
         } while (minPriorityQueue.Any());
 
         Debug.Log("Total visited nodes = " + visitedNodes);
-        route.Add(_graph[target]);
-        return BuildPath(route, _graph[target], nearest);
+        route.Add(graph[target]);
+        return BuildPath(route, graph[target], nearest);
     }
     
     private List<NavNode> BuildPath(List<NavNode> list, NavNode node, Dictionary<NavNode, NavNode> nearest, int recursions = 0) {
@@ -66,17 +64,24 @@ public class Dijkstra : NavigationBase {
         return BuildPath(list, nearest[node], nearest, recursions + 1);
     }
 
-    private void CreateNodeAtLocation(Vector3 location) {
-        var distances = _graph.Select(node =>
+    private void CreateNodeAtLocation(Vector3 location, Dictionary<Vector3, NavNode> graph) {
+        if (graph.ContainsKey(location)) return;
+
+        var distances = graph.Select(node =>
             new KeyValuePair<float, NavNode>(Vector3.Distance(location, node.Value.Location), node.Value)).ToList();
         distances = distances.OrderBy(pair => pair.Key).Take(1).ToList();
 
-        _graph.Add(location, new NavNode() {
+        graph.Add(location, new NavNode() {
             Location = location,
-            Edges = new List<NavEdge> {
+            Edges = new HashSet<NavEdge> {
                 new NavEdge(location, distances[0].Value.Location, distances[0].Key, distances[0].Key, int.MaxValue)
             },
             Index = int.MaxValue
         });
+
+        graph.Remove(distances[0].Value.Location);
+        graph.Add(distances[0].Value.Location, (NavNode) distances[0].Value.Clone());
+        graph[distances[0].Value.Location].Edges.Add(new NavEdge(distances[0].Value.Location, location,
+            distances[0].Key, distances[0].Key, int.MaxValue - 1));
     }
 }

@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
 public class WanderGoal : GoalBase {
-    public WanderGoal(NavigationType navType) : base(navType,
-        new SteeringBehaviour()) {
+    public WanderGoal(NavigationType navType) : base(new SteeringBehaviour()) {
         var steeringBehaviour = SteeringBehaviours;
         steeringBehaviour.Seek = false;
         steeringBehaviour.EnableObjectAvoidance = true;

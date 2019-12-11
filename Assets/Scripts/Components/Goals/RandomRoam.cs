@@ -3,13 +3,15 @@
 using UnityEngine;
 
 public class RandomRoam : GoalBase {
-    public RandomRoam(NavigationType navType) : base(navType, new SteeringBehaviour()) {
+    public RandomRoam() : base(new SteeringBehaviour()) {
         SteeringBehaviours = new SteeringBehaviour {
             EnableObjectAvoidance = true, 
             EnableWallAvoidance = true, 
             Seek = true, 
-            Wander = true
+            Wander = false
         };
+        
+        Navigation = new AStar();
     }
 
     public override (bool, Vector3) CalculateTarget(Vector3 pos, int progress, bool forceRecalc) {

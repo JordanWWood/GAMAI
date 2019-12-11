@@ -1,3 +1,3 @@
 ﻿using Unity.Entities;
 
-public class DesireComponent : IComponentData { }
+public struct DesireComponent : IComponentData { }

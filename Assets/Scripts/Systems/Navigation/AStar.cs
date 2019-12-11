@@ -5,9 +5,9 @@ using PriorityQueues;
 using UnityEngine;
 
 public class AStar : NavigationBase {
-    public AStar(Dictionary<Vector3, NavNode> graph) : base(graph) { }
+    public AStar() { }
 
-    public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target) {
+    public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target, Dictionary<Vector3, NavNode> graph) {
         var priorityQueue = new PriorityQueue<PriorityQueueObject>();
         var route = new List<NavNode>();
 
@@ -18,14 +18,14 @@ public class AStar : NavigationBase {
         var visited = new HashSet<NavNode>();
 
         // Create nodes at both the start and end locations so they are navigable if not directly on a node
-        CreateNodeAtLocation(start);
-        CreateNodeAtLocation(target);
+        CreateNodeAtLocation(start, graph);
+        CreateNodeAtLocation(target, graph);
 
-        priorityQueue.Enqueue(new PriorityQueueObject(_graph[start], 0));
+        priorityQueue.Enqueue(new PriorityQueueObject(graph[start], 0));
         do {
             var node = priorityQueue.Dequeue().Item;
             foreach (var edge in node.Edges.OrderBy(x => x.Cost)) {
-                var child = _graph[edge.To];
+                var child = graph[edge.To];
                 if (visited.Contains(child)) continue;
 
                 var successChild = minCost.TryGetValue(child, out var minCostChild) ? minCostChild : null;
@@ -42,11 +42,11 @@ public class AStar : NavigationBase {
 
             if (!visited.Contains(node))
                 visited.Add(node);
-            if (node.Equals(_graph[target])) break;
+            if (node.Equals(graph[target])) break;
         } while (priorityQueue.Count() != 0);
 
-        route.Add(_graph[target]);
-        return BuildPath(route, _graph[target], nearest);
+        route.Add(graph[target]);
+        return BuildPath(route, graph[target], nearest);
     }
 
     private List<NavNode> BuildPath(List<NavNode> list, NavNode node, Dictionary<NavNode, NavNode> nearest,
@@ -59,24 +59,24 @@ public class AStar : NavigationBase {
         return BuildPath(list, nearest[node], nearest, recursions + 1);
     }
 
-    private void CreateNodeAtLocation(Vector3 location) {
-        if (_graph.ContainsKey(location)) return;
+    private void CreateNodeAtLocation(Vector3 location, Dictionary<Vector3, NavNode> graph) {
+        if (graph.ContainsKey(location)) return;
 
-        var distances = _graph.Select(node =>
+        var distances = graph.Select(node =>
             new KeyValuePair<float, NavNode>(Vector3.Distance(location, node.Value.Location), node.Value)).ToList();
         distances = distances.OrderBy(pair => pair.Key).Take(1).ToList();
 
-        _graph.Add(location, new NavNode() {
+        graph.Add(location, new NavNode() {
             Location = location,
-            Edges = new List<NavEdge> {
+            Edges = new HashSet<NavEdge> {
                 new NavEdge(location, distances[0].Value.Location, distances[0].Key, distances[0].Key, int.MaxValue)
             },
             Index = int.MaxValue
         });
 
-        _graph.Remove(distances[0].Value.Location);
-        _graph.Add(distances[0].Value.Location, (NavNode) distances[0].Value.Clone());
-        _graph[distances[0].Value.Location].Edges.Add(new NavEdge(distances[0].Value.Location, location,
+        graph.Remove(distances[0].Value.Location);
+        graph.Add(distances[0].Value.Location, (NavNode) distances[0].Value.Clone());
+        graph[distances[0].Value.Location].Edges.Add(new NavEdge(distances[0].Value.Location, location,
             distances[0].Key, distances[0].Key, int.MaxValue - 1));
     }
 }

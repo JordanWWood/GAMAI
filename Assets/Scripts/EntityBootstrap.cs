@@ -20,8 +20,6 @@ public class EntityBootstrap : MonoBehaviour {
 
     public bool createAgentsOnStart = true;
 
-    [Range(.1f, 1.0f)] public float Speed;
-
     public static EntityBootstrap Instance;
 
     void Start() {
@@ -32,7 +30,7 @@ public class EntityBootstrap : MonoBehaviour {
         var sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(AgentPrefab, World.Active);
         var sourceCollider = _entityManager.GetComponentData<PhysicsCollider>(sourceEntity).Value;
         if (!createAgentsOnStart) return;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
             Vector3 loc = RandomNavmeshLocation(40);
             SpawnAgentEntity(i, new float3(loc.x, 1f, loc.z), sourceEntity, sourceCollider);
         }

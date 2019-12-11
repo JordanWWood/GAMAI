@@ -103,7 +103,8 @@ public static class SteeringBehaviours {
         return _r.NextFloat() - _r.NextFloat();
     }
 
-    private static (bool hit, Vector3 normal, Vector3 hitLoc, Vector3 objectPos) Raycast(float3 rayFrom, float3 rayTo, uint collideLayer,
+    private static (bool hit, Vector3 normal, Vector3 hitLoc, Vector3 objectPos) Raycast(float3 rayFrom, float3 rayTo,
+        uint collideLayer,
         PhysicsWorld pWorld) {
         var input = new RaycastInput() {
             Start = rayFrom,
@@ -135,5 +136,4 @@ public static class SteeringBehaviours {
         var hitLoc = hit.Position;
         return (true, normal, hitLoc, pWorld.Bodies[hit.RigidBodyIndex].WorldFromBody.pos);
     }
-    
 }

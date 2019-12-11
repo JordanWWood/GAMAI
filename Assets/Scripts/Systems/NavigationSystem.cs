@@ -32,7 +32,7 @@ public class NavigationSystem : ComponentSystem {
                 _graph.Add(from, new NavNode {
                     Index = triangulation.indices[i],
                     Location = from,
-                    Edges = new List<NavEdge> {
+                    Edges = new HashSet<NavEdge> {
                         new NavEdge(from, to, Vector3.Distance(from, to), Vector3.Distance(from, to), i)
                     }
                 });
@@ -47,7 +47,7 @@ public class NavigationSystem : ComponentSystem {
                 _graph.Add(to, new NavNode {
                     Index = triangulation.indices[i + 1],
                     Location = to,
-                    Edges = new List<NavEdge> {
+                    Edges = new HashSet<NavEdge> {
                         new NavEdge(to, from, Vector3.Distance(from, to), Vector3.Distance(from, to), i)
                     }
                 });
@@ -65,8 +65,8 @@ public class NavigationSystem : ComponentSystem {
             if (!aiAgent.DestinationReached) return;
 
             var graph = new Dictionary<Vector3, NavNode>(_graph);
-            var navigation = new AStar(graph);
-            var route = navigation.CalculateRoute(translation.Value, goalComponent.CurrentTarget);
+            var navigation = GoalSystem.EntityGoalMap[goalComponent.index].Peek().Navigation;
+            var route = navigation.CalculateRoute(translation.Value, goalComponent.CurrentTarget, graph);
             route.Reverse();
 
             var bufferFromEntity = EntityManager.GetBuffer<BufferedNavNode>(e);
