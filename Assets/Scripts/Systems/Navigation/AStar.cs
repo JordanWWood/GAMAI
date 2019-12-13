@@ -9,8 +9,7 @@ public class AStar : NavigationBase {
 
     public override List<NavNode> CalculateRoute(Vector3 start, Vector3 target, Dictionary<Vector3, NavNode> graph) {
         var priorityQueue = new PriorityQueue<PriorityQueueObject>();
-        var route = new List<NavNode>();
-
+        
         var minCost = new Dictionary<NavNode, float?>();
         var nearest = new Dictionary<NavNode, NavNode>();
 
@@ -24,7 +23,7 @@ public class AStar : NavigationBase {
         priorityQueue.Enqueue(new PriorityQueueObject(graph[start], 0));
         do {
             var node = priorityQueue.Dequeue().Item;
-            foreach (var edge in node.Edges.OrderBy(x => x.Cost)) {
+            foreach (var edge in node.Edges.OrderBy(x => x.Cost + Vector3.Distance(x.To, target))) {
                 var child = graph[edge.To];
                 if (visited.Contains(child)) continue;
 
@@ -44,7 +43,8 @@ public class AStar : NavigationBase {
                 visited.Add(node);
             if (node.Equals(graph[target])) break;
         } while (priorityQueue.Count() != 0);
-
+        
+        var route = new List<NavNode>();
         route.Add(graph[target]);
         return BuildPath(route, graph[target], nearest);
     }
