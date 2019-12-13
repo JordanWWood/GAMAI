@@ -8,6 +8,7 @@ public struct GoalComponent : IComponentData {
     public int index;
     public int progress;
 
+    public SteeringBehaviour Behaviour;
     public float3 PreviousTarget;
     public Vector3 CurrentTarget;
 }

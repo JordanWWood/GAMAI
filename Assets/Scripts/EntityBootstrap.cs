@@ -20,6 +20,7 @@ public class EntityBootstrap : MonoBehaviour {
 
     public bool createAgentsOnStart = true;
 
+    public bool disableCollisionConstraint = false;
     public static EntityBootstrap Instance;
 
     void Start() {
@@ -30,7 +31,7 @@ public class EntityBootstrap : MonoBehaviour {
         var sourceEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(AgentPrefab, World.Active);
         var sourceCollider = _entityManager.GetComponentData<PhysicsCollider>(sourceEntity).Value;
         if (!createAgentsOnStart) return;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 100; i++) {
             Vector3 loc = RandomNavmeshLocation(40);
             SpawnAgentEntity(i, new float3(loc.x, 1f, loc.z), sourceEntity, sourceCollider);
         }
@@ -82,7 +83,14 @@ public class EntityBootstrap : MonoBehaviour {
             index = id,
             progress = 0
         });
-        
+
+        _entityManager.AddBuffer<BufferedGoal>(entity);
         _entityManager.AddBuffer<BufferedNavNode>(entity);
+        
+        var bufferFromEntity = _entityManager.GetBuffer<BufferedGoal>(entity);
+        bufferFromEntity.Add(new BufferedGoal {
+            Goal = new ExampleGoal()
+        });
     }
 }
+

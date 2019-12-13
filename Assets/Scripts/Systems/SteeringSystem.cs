@@ -24,20 +24,23 @@ public class SteeringSystem : JobComponentSystem {
             const float seekForce = .0025f;
             const float wAvoidForce = .05f;
             const float oAvoidForce = .0075f;
+            const float wanderForce = .0075f;
             const float maxSpeed = .1f;
             
             var currentVelocity = new Vector3(steeringComponent.Velocity.x, steeringComponent.Velocity.y, steeringComponent.Velocity.z);
             var target = new Vector3(nodes[aiAgent.NavigationIndex].Node.x, 1, nodes[aiAgent.NavigationIndex].Node.z);
             var location = new Vector3(localToWorld.Position.x, 1, localToWorld.Position.z);
-
-            var steering = SteeringBehaviours.Seek(currentVelocity, location, target, maxSpeed, seekForce);
-            steering += SteeringBehaviours.WallAvoidance(currentVelocity, translation.Value, maxSpeed, wAvoidForce, 2.0f, World);
-            steering += SteeringBehaviours.ObstacleAvoidance(currentVelocity, translation.Value, oAvoidForce, 3.0f, World);
+            
+            var steering = Vector3.zero;
+            if (goalComponent.Behaviour.Seek) steering += SteeringBehaviours.Seek(currentVelocity, location, target, maxSpeed, seekForce);
+            if (goalComponent.Behaviour.EnableWallAvoidance) steering += SteeringBehaviours.WallAvoidance(currentVelocity, translation.Value, maxSpeed, wAvoidForce, 2.0f, World);
+            if (goalComponent.Behaviour.EnableObjectAvoidance) steering += SteeringBehaviours.ObstacleAvoidance(currentVelocity, translation.Value, oAvoidForce, 3.0f, World);
+            if (goalComponent.Behaviour.Wander) steering += SteeringBehaviours.Wander(currentVelocity, location, maxSpeed, 25f, 25f, .1f, wanderForce);
 
             var newDirection = Vector3.ClampMagnitude(currentVelocity + steering, maxSpeed);
             if (Vector3.Distance(target, location) <= .5f) {
                 var destinationReached = aiAgent.DestinationReached || aiAgent.NavigationIndex + 1 >= nodes.Length;
-                EntityCommandBuffer.SetComponent(index, entity, new AiAgentComponent() {
+                EntityCommandBuffer.SetComponent(index, entity, new AiAgentComponent {
                     NavigationIndex = aiAgent.NavigationIndex + 1,
                     DeferredFrames = aiAgent.DeferredFrames,
                     DestinationReached = destinationReached,
